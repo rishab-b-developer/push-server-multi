@@ -29,8 +29,8 @@ app.use((request, response, next) => {
     next();
 });
 
-app.get('/', () => {
-    response.render('./home.html');
+app.get('/', (request, response) => {
+    response.sendFile(__dirname +'/home.html');
 });
 
 app.post('/register', (request, response) => {
