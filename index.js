@@ -8,7 +8,6 @@ const devices = require('./devices');
 const port = process.env.PORT || 8080;
 const logFile = 'server.log';
 const year = new Date().getFullYear();
-const GCM_KEY = 'AIzaSyDcXYUfHMmOYF1I8XEtE2su8kEteV5nXt4';
 const FCM_KEY = 'AAAAgZr5So0:APA91bEG7Xz1mI2Lt9_lVaZU8TqIPQ7gbzF1TF9FYCyBOEB0dh7KllVSClU2qGp48JdAOZiX8hJWfkZl0VEo-spqhzcCs9S1J-N8ZPAlDY5D2znNosDT95lrNxWAAUiW_J-sU7OhhgEe';
 
 var fcmSender = new fcm(FCM_KEY);
@@ -28,6 +27,10 @@ app.use((request, response, next) => {
     });
     console.log(logText);
     next();
+});
+
+app.get('/', () => {
+    response.render('./home.html');
 });
 
 app.post('/register', (request, response) => {
