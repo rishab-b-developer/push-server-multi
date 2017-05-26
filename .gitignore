@@ -1,0 +1,5 @@
+node_modules
+server.log
+temp.log
+devices-info.json
+.vscode
