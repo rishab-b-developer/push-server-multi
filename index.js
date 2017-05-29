@@ -63,8 +63,8 @@ app.post('/push', (request, response) => {
         collapse_key: 'JioMedia',
         timeToLive: 28 * 86400,
         data: {
-            title: request.body.title,
-            message: request.body.message
+           li: 'http://data1.ibtimes.co.in/en/full/613807/tubelight-fake-poster.jpg',
+           des: 'Tubelight is the story of a man\'s unshakable faith in himself and the love for his family.'
         },
         notification: {
             priority: 'high',
