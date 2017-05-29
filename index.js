@@ -62,16 +62,8 @@ app.post('/push', (request, response) => {
         to: toStr, // required fill with device token or topics
         collapse_key: 'JioMedia',
         timeToLive: 28 * 86400,
-        data: {
-           li: 'http://data1.ibtimes.co.in/en/full/613807/tubelight-fake-poster.jpg',
-           des: 'Tubelight is the story of a man\'s unshakable faith in himself and the love for his family.'
-        },
-        notification: {
-            priority: 'high',
-            sound: 'ping.aiff',
-            title: request.body.title,
-            body: request.body.message
-        }
+        data: request.body.data,
+        notification: request.body.notification
     };
 
     fcmSender.send(message, function (err, messageId) {
