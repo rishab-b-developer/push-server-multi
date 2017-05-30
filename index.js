@@ -8,7 +8,8 @@ const devices = require('./devices');
 const port = process.env.PORT || 8080;
 const logFile = 'server.log';
 const year = new Date().getFullYear();
-const FCM_KEY = 'AAAAgZr5So0:APA91bEG7Xz1mI2Lt9_lVaZU8TqIPQ7gbzF1TF9FYCyBOEB0dh7KllVSClU2qGp48JdAOZiX8hJWfkZl0VEo-spqhzcCs9S1J-N8ZPAlDY5D2znNosDT95lrNxWAAUiW_J-sU7OhhgEe';
+//const FCM_KEY = 'AAAAgZr5So0:APA91bEG7Xz1mI2Lt9_lVaZU8TqIPQ7gbzF1TF9FYCyBOEB0dh7KllVSClU2qGp48JdAOZiX8hJWfkZl0VEo-spqhzcCs9S1J-N8ZPAlDY5D2znNosDT95lrNxWAAUiW_J-sU7OhhgEe';
+const FCM_KEY = 'AAAA7KpxExM:APA91bH3DC8Um5-TY0FfXcm4krOYdaJTGLm5vhARjFKnVPSqlISPyNMwHrP-eIf-oK57LbBqw3UN17qkiteLS7jXbPvAgimXWTarxo606V0y-e7c8YfPg-yLOBqaG0kHugv3J4u3jF8C';
 
 var fcmSender = new fcm(FCM_KEY);
 
