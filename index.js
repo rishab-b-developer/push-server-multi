@@ -12,6 +12,9 @@ const year = new Date().getFullYear();
 const FCM_KEY = 'AAAA7KpxExM:APA91bH3DC8Um5-TY0FfXcm4krOYdaJTGLm5vhARjFKnVPSqlISPyNMwHrP-eIf-oK57LbBqw3UN17qkiteLS7jXbPvAgimXWTarxo606V0y-e7c8YfPg-yLOBqaG0kHugv3J4u3jF8C';
 
 var fcmSender = new fcm(FCM_KEY);
+var sendNotification = (message, resultHandler) => {
+    fcmSender.send(message, resultHandler);
+};
 
 var app = express();
 app.listen(port, () => {
@@ -31,20 +34,15 @@ app.use((request, response, next) => {
 });
 
 app.get('/', (request, response) => {
-    response.sendFile(__dirname +'/home.html');
+    response.sendFile(__dirname + '/home.html');
 });
 
 app.post('/register', (request, response) => {
-    devices.addDevice(request.body.deviceId, request.body.platform.toLowerCase())
+    devices.addDeviceId(request.body.jioId, request.body.deviceId, request.body.platform.toLowerCase())
         .then((result) => {
             var message = result ? 'Device registered successfully.' : 'Device already registered.';
             response.status(200).send({
                 message
-            });
-        }, (errorObj) => {
-            response.status(400).send({
-                message: 'Device registeration failed',
-                error: errorObj.message
             });
         })
         .catch((errorObj) => {
@@ -56,47 +54,52 @@ app.post('/register', (request, response) => {
 });
 
 app.post('/push', (request, response) => {
-
-    var toStr = (request.body.deviceId != null)? request.body.deviceId:'/topics/fcmdemo';
-
+    
     var message = {
-        to: toStr, // required fill with device token or topics
+        to: '/topics/fcmdemo', // required fill with device token or topics
         collapse_key: 'JioMedia',
         timeToLive: 28 * 86400,
         data: request.body.data,
         notification: request.body.notification
     };
 
-    fcmSender.send(message, function (err, messageId) {
-        if (err) {
-            response.status(400).send({
-                message: 'Notification push failed',
-                error: err
+    if (request.body.jioId != null) {
+        devices.getPlatformDeviceIdForJioId(request.body.platform.toLowerCase(), request.body.jioId)
+            .then((deviceId) => {
+                message.to = deviceId;
+                sendNotification(message, function (err, messageId) {
+                    if (err) {
+                        response.status(400).send({
+                            message: 'Notification push failed',
+                            error: err
+                        })
+                    } else {
+                        response.status(200).send({
+                            message: 'Notification push success',
+                            result: messageId
+                        })
+                    }
+                });
             })
-        } else {
-            response.status(200).send({
-                message: 'Notification push success',
-                result: messageId
-            })
-        }
-    });
-
-    /*devices.getPlatformDevices(request.body.platform.toLowerCase())
-        .then((platformDevices) => {
-            
-
-        }, (errorObj) => {
-            response.status(400)
-                .send({
+            .catch((errorObj) => {
+                response.status(400).send({
                     message: 'Notification push failed',
                     error: errorObj.message
                 });
-        })
-        .catch((errorObj) => {
-            response.status(400)
-                .send({
+            });
+    } else {
+        sendNotification(message, function (err, messageId) {
+            if (err) {
+                response.status(400).send({
                     message: 'Notification push failed',
-                    error: errorObj.message
-                });
-        });*/
+                    error: err
+                })
+            } else {
+                response.status(200).send({
+                    message: 'Notification push success',
+                    result: messageId
+                })
+            }
+        });
+    }
 });

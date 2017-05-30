@@ -14,8 +14,8 @@ getDevicesAsync = (resultHandler) => {
             });
         } else {
             resultHandler({
-                ios: [],
-                android: []
+                ios: {},
+                android: {}
             }, null);
         }
     });
@@ -25,27 +25,24 @@ saveDevicesAsync = (devices, resultHandler) => {
     fs.writeFile(fileName, JSON.stringify(devices, undefined, 4), resultHandler);
 }
 
-checkIfAlreadyAdded = (devicesInfo, deviceId, platform) => {
-    var platformDevicesInfo = devicesInfo[platform];
-    if (platformDevicesInfo != null) {
-        var savedPlatformDevicesInfo = platformDevicesInfo.filter((tempDeviceId) => tempDeviceId === deviceId);
-        if (savedPlatformDevicesInfo != null && savedPlatformDevicesInfo.length > 0) {
-            return savedPlatformDevicesInfo[0];
-        }
-        return null;
+checkIfAlreadyAdded = (devicesInfo, jioId, deviceId, platform) => {
+    var platformInfo = devicesInfo[platform];
+    if (platformInfo != null && Object.keys(platformInfo).length > 0) {
+        var savedDeviceId = platformInfo[jioId];
+        return ((savedDeviceId != null) && (savedDeviceId === deviceId));
     }
     return null;
 }
 
-var addDevice = (deviceId, platform) => {
+var addDeviceId = (jioId, deviceId, platform) => {
     return new Promise((resolve, reject) => {
         if (platform === 'ios' || platform === 'android') {
-            if (deviceId != null) {
+            if (jioId != null && deviceId != null) {
                 getDevicesAsync((devicesInfo, error) => {
                     if (devicesInfo) {
-                        if (!checkIfAlreadyAdded(devicesInfo, deviceId, platform)) {
-                            var platformDevicesInfo = devicesInfo[platform];
-                            platformDevicesInfo.push(deviceId);
+                        if (!checkIfAlreadyAdded(devicesInfo, jioId, deviceId, platform)) {
+                            var platformInfo = devicesInfo[platform];
+                            platformInfo[jioId] = deviceId;
                             saveDevicesAsync(devicesInfo, (error) => {
                                 if (error) {
                                     reject(error);
@@ -61,7 +58,7 @@ var addDevice = (deviceId, platform) => {
                     }
                 });
             } else {
-                reject(new Error('Device id cannot be null.'));
+                reject(new Error('DeviceId/JioId cannot be null.'));
             }
         } else {
             reject(new Error('Platform not configured'));
@@ -69,14 +66,40 @@ var addDevice = (deviceId, platform) => {
     });
 }
 
-var getPlatformDevices = (platform) => {
+var getPlatformDeviceIds = (platform) => {
     return new Promise((resolve, reject) => {
         if (platform === 'ios' || platform === 'android') {
             getDevicesAsync((devicesInfo, error) => {
                 if (devicesInfo) {
-                    var platformDevicesInfo = devicesInfo[platform];
-                    if (platformDevicesInfo != null && platformDevicesInfo.length > 0) {
-                        resolve(platformDevicesInfo);
+                    var platformInfo = devicesInfo[platform];
+                    if (platformInfo != null && Object.keys(platformInfo).length > 0) {
+                        resolve(platformInfo);
+                    } else {
+                        reject(new Error('No device found for this platform.'));
+                    }
+                } else {
+                    reject(error);
+                }
+            });
+        } else {
+            reject(new Error('Platform not configured'));
+        }
+    });
+}
+
+var getPlatformDeviceIdForJioId = (platform, jioId) => {
+    return new Promise((resolve, reject) => {
+        if (platform === 'ios' || platform === 'android') {
+            getDevicesAsync((devicesInfo, error) => {
+                if (devicesInfo) {
+                    var platformInfo = devicesInfo[platform];
+                    if (platformInfo != null && Object.keys(platformInfo).length > 0) {
+                        var savedDeviceId = platformInfo[jioId];
+                        if (savedDeviceId != null) {
+                            resolve(savedDeviceId);
+                        } else {
+                            reject(new Error('No device found for this jioId.'));
+                        }
                     } else {
                         reject(new Error('No device found for this platform.'));
                     }
@@ -91,6 +114,7 @@ var getPlatformDevices = (platform) => {
 }
 
 module.exports = {
-    addDevice,
-    getPlatformDevices
+    addDeviceId,
+    getPlatformDeviceIdForJioId,
+    getPlatformDeviceIds
 }
